@@ -77,15 +77,22 @@ class Image
         return $this;
     }
 
-    public function __call($name, $arguments): static
+    /**
+     * Dynamically handle calls into the manipulations instance.
+     *
+     * @param string $name
+     * @param array<mixed> $arguments
+     * @return $this|mixed
+     */
+    public function __call($name, $arguments)
     {
         if (! method_exists($this->manipulations, $name)) {
             throw new BadMethodCallException("Manipulation `{$name}` does not exist");
         }
 
-        $this->manipulations->$name(...$arguments);
+        $return = $this->manipulations->$name(...$arguments);
 
-        return $this;
+        return $return instanceof Manipulations ? $this : $return;
     }
 
     public function getWidth(): int
@@ -96,11 +103,6 @@ class Image
     public function getHeight(): int
     {
         return InterventionImage::make($this->pathToImage)->height();
-    }
-
-    public function getManipulationSequence(): ManipulationSequence
-    {
-        return $this->manipulations->getManipulationSequence();
     }
 
     public function save(string $outputPath = ''): void
